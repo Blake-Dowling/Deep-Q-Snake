@@ -174,13 +174,13 @@ if __name__ == "__main__":
     layer2 = keras.layers.Dense(4, activation="softmax")
     model.add(layer2)
     model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
-
+    #Tensorboard logging
     log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
 
     ####################Load Model####################
-    # model = keras.models.load_model("model1.h5")
+    #model = keras.models.load_model("model1.h5")
 
     ####################Tensor Visualizers####################
     visualPlot1 = visual.visual.MatrixPlot(window, 20, 450, "Input Layer")
@@ -188,7 +188,7 @@ if __name__ == "__main__":
 
     ####################Main Loop####################
     trainingFrames = 0
-    TRAIN_MINUTES = 1
+    TRAIN_MINUTES = 5
     iteration = 0
     loopedMoves = 0
     apples = 0
@@ -280,8 +280,4 @@ framesFile = open("NumFrames.txt", "a+")
 framesFile.write("Number of Frames:" + str(trainingFrames) + "\n")
 framesFile.close()
 model.save("model1.h5")
-#Create tensorboard log
-current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-train_log_dir = 'logs/snake/' + current_time + '/train'
-tf.summary.create_file_writer(train_log_dir)
 time.sleep(200)

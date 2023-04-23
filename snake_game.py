@@ -8,7 +8,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 CELL = 40 #Number of pixels per display cell
-WIDTH = 4 #Number of cells wide screen
+WIDTH = 3 #Number of cells wide screen
 ############################## Tkinter Initialization ##############################
 window = Tk()
 window.resizable(False, False)

@@ -25,8 +25,9 @@ Debugging with Tensorboard:
 ```
     # Clear any logs from previous runs
     rm -rf ./logs/
+    # View fit histograms
     tensorboard --logdir logs/fit
-    tensorboard --logdir logs/gradient_tape
+    Go to http://localhost:6006/ in your browser
 ```
 
 ## What I learned:

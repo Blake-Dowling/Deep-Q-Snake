@@ -1,2 +1,8 @@
 Train_Stats:[0]:[0]: 
 Cumulative_Iterations: 0 Apples: 0 Fails: 0 Performance_(Apples/Fails): 0 
+Train_Stats:[0, 100]:[0, 10.333333333333334]: 
+Cumulative_Iterations: 100 Apples: 31 Fails: 3 Performance_(Apples/Fails): 10.333333333333334 
+Train_Stats:[0, 100, 300]:[0, 10.333333333333334, 8.857142857142858]: 
+Cumulative_Iterations: 200 Apples: 62 Fails: 7 Performance_(Apples/Fails): 8.857142857142858 
+Train_Stats:[0, 100, 300, 600]:[0, 10.333333333333334, 8.857142857142858, 8.7]: 
+Cumulative_Iterations: 300 Apples: 87 Fails: 10 Performance_(Apples/Fails): 8.7 
