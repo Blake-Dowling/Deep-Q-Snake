@@ -25,7 +25,7 @@ def look(snake, apple):
     if len(snake.blocks): #Check snake has at least one block
         head = snake.blocks[0].loc #Snake head coordinates
     else:
-        return np.array([0.0 for i in range(16)])
+        return np.array([0.0 for i in range(8)])
     distToWall = [WIDTH-head[0],
                    WIDTH-head[1],
                    head[0]+1,
@@ -102,11 +102,12 @@ def updatePlot(statsPlot, statsCanvas, train_stats_x, train_stats_y, iteration, 
     scoreFile.close()
 
 def loadStats():
+    ##########Deleting file each time for now to manage size.##########
+    open("Scores1.txt", "w").close()
     scoreFile = open("Scores1.txt", "r")
     lines = scoreFile.readlines()
     scoreFile.close()
-    ##########Deleting file each time for now to manage size.##########
-    open("Scores1.txt", "w").close()
+    
     secondLastLine = ""
     lastLine = ""
     if(len(lines)):
@@ -194,7 +195,7 @@ if __name__ == "__main__":
     train_stats_x = []
     train_stats_y = []
 
-    statsPlot, statsCanvas = embed_plot.embedPlot(window, 0, 360, 2, train_stats_x, train_stats_y)
+    statsPlot, statsCanvas = embed_plot.embedPlot(window, 0, 320, 2, train_stats_x, train_stats_y)
     while iteration < 1000*TRAIN_MINUTES:
         if checkWin(snake):
             break
@@ -211,7 +212,7 @@ if __name__ == "__main__":
             apples = apples + 1
             loopedMoves = 0
             apple = spawnApple(snake, apple)
-            for i in range(max(0,   min(len(input_train) -16, len(output_train) -16)), min(len(input_train), len(output_train))): #For each training frame
+            for i in range(max(0,   min(len(input_train) -WIDTH, len(output_train) -WIDTH)), min(len(input_train), len(output_train))): #For each training frame
                 dir = tf.get_static_value(output_train[i]) #(Good) direction of snake with current frame
                 model.fit(input_train[i], tf.constant([dir]), epochs = 1, verbose=0) #Train each training state with direction frame
             input_train = []

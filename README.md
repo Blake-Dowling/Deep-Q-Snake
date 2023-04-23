@@ -1,3 +1,26 @@
+# Python Tensorflow Deep Neural Network Q-Learning Snake Game Agent
+
+## Trains a Deep Neural Network to win a game of Snake uring Q-Learning
+
+## This project is a Python application that trains a deep neural network using the game state as input and the snake's direction as output. It works by:
+
+* Using a 3-layer Keras model to collect input describing (for each direction) 1. the snake head's location relative to the apple (4 nodes), 2. the snake head's boolean value of being next to a wall (4 nodes), and 3. the snake head's boolean value of being next to its body (4 nodes).
+* The Keras model uses the adam optimizer, the sparse categorical crossentropy loss function, and the relu and softmax activation functions for the hidden and output layers, respectively.
+* How the model is trained:
+    * The model is fit using the following data when an apple is eaten: input: the last (screen width) game states seen. output: the corresponding directions during the last (screen width) game states.
+    * The model is fit using the following data when the snake goes out of bounds: input: the last game state seen. output: the rightward rotation from the corresponding direction during the last game state.
+    * The model is fit using the following data when the snake collides with itself: input: the last game state seen. output: the leftward rotation from the corresponding direction during the last game state.
+* How the model's performance is assessed:
+    The model's performance is measured as the ratio of total apples eaten to the total fails (out of bounds or self-collisions). Every 100 frames, the x value (# of iterations) and the y value (# of apples / # of fails) is added to a list of 'stats'. This list is saved to a file, 'Scores.txt' to be loaded when the program is rerun. This 'stats' list is also displayed to the user using MatplotLib, and it is refreshed every 100 frames.
+
+
+# Video
+(Coming soon!)
+
+
+## How to use this application:
+(Soon to be deployed!)
+
 
 ## What I learned:
 
@@ -18,4 +41,4 @@ The snake tended to loop, and after comparing the input and output of the keras 
 Another factor ccausing looping was an excess reliance on the model by the snake. Once the model learned a direction from which it ate the apple, it tended to always prefer this direction. This issue was solved by adding a random direction change every 16 steps, to prevent too much reliance on the model and allow the snake to learn to encounter the apple from all directions.
 
 #Current Issues:
-The program crashes when the Scores1.txt file becomes too large, so the initial values of the file must be erased periodically.
+The program crashes when the Scores1.txt file becomes too large, so the initial values of the file must be erased periodically. My plan is to consolidate training stats lists into a single plot coordinate.
