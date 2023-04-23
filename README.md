@@ -4,7 +4,7 @@
 
 ## This project is a Python application that trains a deep neural network using the game state as input and the snake's direction as output. It works by:
 
-* Using a 3-layer Keras model to collect input describing (for each direction) 1. the snake head's location relative to the apple (4 nodes), 2. the snake head's boolean value of being next to a wall (4 nodes), and 3. the snake head's boolean value of being next to its body (4 nodes).
+* Using a 3-layer Keras model to collect input describing (for each direction) 1. the snake head's location relative to the apple (4 nodes), 2. the snake head's boolean value of being next to a wall (4 nodes), 3. the snake head's boolean value of being next to its body (4 nodes), and 4. the snake's direction (1 one-hot node).
 * The Keras model uses the adam optimizer, the sparse categorical crossentropy loss function, and the relu and softmax activation functions for the hidden and output layers, respectively.
 * How the model is trained:
     * The model is fit using the following data when an apple is eaten: input: the last (screen width) game states seen. output: the corresponding directions during the last (screen width) game states.
@@ -14,13 +14,20 @@
     The model's performance is measured as the ratio of total apples eaten to the total fails (out of bounds or self-collisions). Every 100 frames, the x value (# of iterations) and the y value (# of apples / # of fails) is added to a list of 'stats'. This list is saved to a file, 'Scores.txt' to be loaded when the program is rerun. This 'stats' list is also displayed to the user using MatplotLib, and it is refreshed every 100 frames.
 
 
-# Video
+## Video
 (Coming soon!)
 
 
 ## How to use this application:
 (Soon to be deployed!)
 
+Debugging with Tensorboard:
+```
+    # Clear any logs from previous runs
+    rm -rf ./logs/
+    tensorboard --logdir logs/fit
+    tensorboard --logdir logs/gradient_tape
+```
 
 ## What I learned:
 

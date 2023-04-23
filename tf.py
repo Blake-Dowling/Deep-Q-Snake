@@ -1,6 +1,7 @@
 import random
 import math
 import time
+import datetime
 from tkinter import *
 import numpy as np
 import tensorflow as tf
@@ -174,11 +175,12 @@ if __name__ == "__main__":
     model.add(layer2)
     model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
 
-
+    log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
 
     ####################Load Model####################
-    #model = keras.models.load_model("model1.h5")
+    # model = keras.models.load_model("model1.h5")
 
     ####################Tensor Visualizers####################
     visualPlot1 = visual.visual.MatrixPlot(window, 20, 450, "Input Layer")
@@ -186,7 +188,7 @@ if __name__ == "__main__":
 
     ####################Main Loop####################
     trainingFrames = 0
-    TRAIN_MINUTES = 5
+    TRAIN_MINUTES = 1
     iteration = 0
     loopedMoves = 0
     apples = 0
@@ -219,7 +221,7 @@ if __name__ == "__main__":
             apple = spawnApple(snake, apple)
             for i in range(max(0,   min(len(input_train) -WIDTH, len(output_train) -WIDTH)), min(len(input_train), len(output_train))): #For each training frame
                 dir = tf.get_static_value(output_train[i]) #(Good) direction of snake with current frame
-                model.fit(input_train[i], tf.constant([dir]), epochs = 1, verbose=0) #Train each training state with direction frame
+                model.fit(input_train[i], tf.constant([dir]), epochs = 1, verbose=0, callbacks=[tensorboard_callback]) #Train each training state with direction frame
                 trainingFrames = trainingFrames + 1
             input_train = []
             output_train = []
@@ -260,13 +262,13 @@ if __name__ == "__main__":
             if snakeIsOB:
                 dir = tf.get_static_value(output_train[len(output_train)-1]) #(Bad) direction of snake in final training frame
                 rightTurn = (float(dir + 1) % 4) #Model- Direction float representing bad dir + 1
-                model.fit(input_train[len(input_train)-1], tf.constant([rightTurn]), epochs = 1, verbose=0) #train final input frame
+                model.fit(input_train[len(input_train)-1], tf.constant([rightTurn]), epochs = 1, verbose=0,  callbacks=[tensorboard_callback]) #train final input frame
                 #with final output frame turned to right
                 trainingFrames = trainingFrames + 1
             if snakeCollidedBody:
                 dir = tf.get_static_value(output_train[len(output_train)-1]) #(Bad) direction of snake in final training frame
                 leftTurn = (float(dir - 1) % 4) #Model- Direction float representing bad dir + 1
-                model.fit(input_train[len(input_train)-1], tf.constant([leftTurn]), epochs = 1, verbose=0) #train final input frame
+                model.fit(input_train[len(input_train)-1], tf.constant([leftTurn]), epochs = 1, verbose=0,  callbacks=[tensorboard_callback]) #train final input frame
                 #with final output frame turned to left
                 trainingFrames = trainingFrames + 1
             input_train = [] #Reset input training frames
@@ -278,4 +280,8 @@ framesFile = open("NumFrames.txt", "a+")
 framesFile.write("Number of Frames:" + str(trainingFrames) + "\n")
 framesFile.close()
 model.save("model1.h5")
+#Create tensorboard log
+current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+train_log_dir = 'logs/snake/' + current_time + '/train'
+tf.summary.create_file_writer(train_log_dir)
 time.sleep(200)

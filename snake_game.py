@@ -91,7 +91,6 @@ def checkOB(snake):
         snake.blocks[0].loc[1] < 0 or
         snake.blocks[0].loc[1] >= WIDTH)
 def checkWin(snake):
-    print(len(snake.blocks), WIDTH*WIDTH)
     return len(snake.blocks) >= WIDTH * WIDTH
 ############################## Check Self-Collision ##############################
 #Returns True if head is on body

@@ -1,5 +1,4 @@
-Number of Frames:1606
-Number of Frames:4055
-Number of Frames:4300
-Number of Frames:4282
-Number of Frames:4243
+Number of Frames:2183
+Number of Frames:2374
+Number of Frames:581
+Number of Frames:332

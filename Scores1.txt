@@ -1,10 +1,2 @@
 Train_Stats:[0]:[0]: 
 Cumulative_Iterations: 0 Apples: 0 Fails: 0 Performance_(Apples/Fails): 0 
-Train_Stats:[0, 100]:[0, 0.17647058823529413]: 
-Cumulative_Iterations: 100 Apples: 6 Fails: 34 Performance_(Apples/Fails): 0.17647058823529413 
-Train_Stats:[0, 100, 300]:[0, 0.17647058823529413, 0.22058823529411764]: 
-Cumulative_Iterations: 200 Apples: 15 Fails: 68 Performance_(Apples/Fails): 0.22058823529411764 
-Train_Stats:[0, 100, 300, 600]:[0, 0.17647058823529413, 0.22058823529411764, 0.30526315789473685]: 
-Cumulative_Iterations: 300 Apples: 29 Fails: 95 Performance_(Apples/Fails): 0.30526315789473685 
-Train_Stats:[0, 100, 300, 600, 1000]:[0, 0.17647058823529413, 0.22058823529411764, 0.30526315789473685, 0.358974358974359]: 
-Cumulative_Iterations: 400 Apples: 42 Fails: 117 Performance_(Apples/Fails): 0.358974358974359 
