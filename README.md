@@ -15,7 +15,21 @@
 
 
 ## Video
-(Coming soon!)
+
+Initial Training Frames:
+
+https://user-images.githubusercontent.com/121590227/233870419-b29dac1d-e907-4414-8555-8b6284f6a134.mov
+
+
+After 2,000 Training Frames:
+
+https://user-images.githubusercontent.com/121590227/233870466-84e79951-e470-4b93-8369-00c542c4e255.mov
+
+
+After 4,500 Training Frames:
+
+https://user-images.githubusercontent.com/121590227/233870368-1f0da38b-de63-4f37-8471-1d98c2a314a1.mov
+
 
 
 ## How to use this application:
