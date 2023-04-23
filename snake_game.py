@@ -8,7 +8,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 CELL = 40 #Number of pixels per display cell
-WIDTH = 16 #Number of cells wide screen
+WIDTH = 8 #Number of cells wide screen
 ############################## Tkinter Initialization ##############################
 window = Tk()
 window.resizable(False, False)
@@ -90,6 +90,8 @@ def checkOB(snake):
         snake.blocks[0].loc[0] > WIDTH or
         snake.blocks[0].loc[1] < 0 or
         snake.blocks[0].loc[1] > WIDTH)
+def checkWin(snake):
+    return len(snake.blocks) == WIDTH * WIDTH
 ############################## Check Self-Collision ##############################
 #Returns True if head is on body
 def checkSelfCollision(snake):

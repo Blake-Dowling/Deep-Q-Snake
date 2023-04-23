@@ -182,6 +182,8 @@ if __name__ == "__main__":
     
     statsPlot, statsCanvas = embed_plot.embedPlot(window, 0, 0, 2, train_stats_x, train_stats_y)
     while iteration < 1000*TRAIN_MINUTES:
+        if checkWin(snake):
+            break
         if iteration % 100 == 0:
             updatePlot(statsPlot, statsCanvas, train_stats_x, train_stats_y, iteration, apples, fails)
         iteration = iteration + 1
