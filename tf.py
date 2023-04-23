@@ -161,7 +161,7 @@ if __name__ == "__main__":
             loopedMoves = 0
             del apple 
             apple = Block(random.randint(0, WIDTH-1), random.randint(0, WIDTH-1), "red", "black") #Move apple
-            for i in range(min(len(input_train), len(output_train))): #For each training frame
+            for i in range(max(0,   min(len(input_train) -10, len(output_train) -10)), min(len(input_train), len(output_train))): #For each training frame
                 dir = tf.get_static_value(output_train[i]) #(Good) direction of snake with current frame
                 model.fit(input_train[i], tf.constant([dir]), epochs = 1, verbose=0) #Train each training state with direction frame
             input_train = []
