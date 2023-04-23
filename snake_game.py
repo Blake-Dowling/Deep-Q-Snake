@@ -15,7 +15,7 @@ window.resizable(False, False)
 canvas = Canvas(window,
                 bg = "black",
                 width = WIDTH*CELL,
-                height = WIDTH*CELL)
+                height = WIDTH*CELL + 280)
 canvas.pack()
 ############################################################
 ############################## Block Class ##############################

@@ -46,11 +46,11 @@ def look(snake, apple):
                 case _: break
             seen[direction].append(nextLoc) #Blocks seen so far in direction
             ##########Check if body block next to head##########
-            # if radius == 1: #Vision block coordinate next to head in currently checked direction
-            #     for block in snake.blocks: #Must check each body block
-            #         if block.loc == nextLoc: #Seen block is a snake body block
-            #             body[direction] = 1.0 #Set input for 'body seen in this direction' to 1.0
-            #             break
+            if radius == 1: #Vision block coordinate next to head in currently checked direction
+                for block in snake.blocks: #Must check each body block
+                    if block.loc == nextLoc: #Seen block is a snake body block
+                        body[direction] = 1.0 #Set input for 'body seen in this direction' to 1.0
+                        break
         ##########Check if wall is next to head in currently checked direction##########
         if len(seen[direction]) == 0 and (direction % 2) == 0: #If vision length is 0 in direction and direction is
             #right, down, left, or up
@@ -104,6 +104,9 @@ def updatePlot(statsPlot, statsCanvas, train_stats_x, train_stats_y, iteration, 
 def loadStats():
     scoreFile = open("Scores1.txt", "r")
     lines = scoreFile.readlines()
+    scoreFile.close()
+    ##########Deleting file each time for now to manage size.##########
+    open("Scores1.txt", "w").close()
     secondLastLine = ""
     lastLine = ""
     if(len(lines)):
@@ -127,9 +130,18 @@ def loadStats():
         iteration = int(lineList[1])
         apples = int(lineList[3])
         fails = int(lineList[5])
-    scoreFile.close()
+    
     return (train_stats_x, train_stats_y, iteration, apples, fails)
     
+def spawnApple(snake, apple):
+    del apple 
+    apple = Block(random.randint(0, WIDTH-1), random.randint(0, WIDTH-1), "red", "black") #Move apple
+    while snake.onSnake(apple):
+        del apple 
+        apple = Block(random.randint(0, WIDTH-1), random.randint(0, WIDTH-1), "red", "black") #Move apple
+    return apple
+
+
 
 if __name__ == "__main__":
     
@@ -169,18 +181,20 @@ if __name__ == "__main__":
     # visualPlot2 = visual.visual.MatrixPlot(window, 0, 450)
 
     ####################Main Loop####################
-    TRAIN_MINUTES = 10
+    TRAIN_MINUTES = 5
     iteration = 0
     loopedMoves = 0
     apples = 0
     fails = 0
 
-    train_stats_x = []
-    train_stats_y = []
+    
     #Set stats to cumulative stats from Scores1 file
     (train_stats_x, train_stats_y, iteration, apples, fails) = loadStats()
-    
-    statsPlot, statsCanvas = embed_plot.embedPlot(window, 0, 0, 2, train_stats_x, train_stats_y)
+    #Resetting training stats lists for now to manage sizes.
+    train_stats_x = []
+    train_stats_y = []
+
+    statsPlot, statsCanvas = embed_plot.embedPlot(window, 0, 360, 2, train_stats_x, train_stats_y)
     while iteration < 1000*TRAIN_MINUTES:
         if checkWin(snake):
             break
@@ -196,8 +210,7 @@ if __name__ == "__main__":
         if ate:
             apples = apples + 1
             loopedMoves = 0
-            del apple 
-            apple = Block(random.randint(0, WIDTH-1), random.randint(0, WIDTH-1), "red", "black") #Move apple
+            apple = spawnApple(snake, apple)
             for i in range(max(0,   min(len(input_train) -16, len(output_train) -16)), min(len(input_train), len(output_train))): #For each training frame
                 dir = tf.get_static_value(output_train[i]) #(Good) direction of snake with current frame
                 model.fit(input_train[i], tf.constant([dir]), epochs = 1, verbose=0) #Train each training state with direction frame
@@ -228,25 +241,24 @@ if __name__ == "__main__":
         window.update()
         snake.move(ate) #Move snake
         snakeIsOB = checkOB(snake)
-        # snakeCollidedBody = checkSelfCollision(snake)
-        if snakeIsOB or loopedMoves > 100:
+        snakeCollidedBody = checkSelfCollision(snake)
+        if snakeIsOB or snakeCollidedBody or loopedMoves > 100:
             fails = fails + 1
             loopedMoves = 0
             del snake
-            del apple
+            
             snake = Snake()
             #Create apple
-            apple = Block(random.randint(0, WIDTH-1), random.randint(0, WIDTH-1), "red", "black")
-            #for i in range(min(len(input_train), len(output_train))):
+            apple = spawnApple(snake, apple)
             if snakeIsOB:
                 dir = tf.get_static_value(output_train[len(output_train)-1]) #(Bad) direction of snake in final training frame
                 rightTurn = (float(dir + 1) % 4) #Model- Direction float representing bad dir + 1
                 model.fit(input_train[len(input_train)-1], tf.constant([rightTurn]), epochs = 1, verbose=0) #train final input frame
             #with final output frame turned to right
-            # if snakeCollidedBody:
-            #     dir = tf.get_static_value(output_train[len(output_train)-1]) #(Bad) direction of snake in final training frame
-            #     leftTurn = (float(dir - 1) % 4) #Model- Direction float representing bad dir + 1
-            #     model.fit(input_train[len(input_train)-1], tf.constant([leftTurn]), epochs = 1, verbose=0) #train final input frame
+            if snakeCollidedBody:
+                dir = tf.get_static_value(output_train[len(output_train)-1]) #(Bad) direction of snake in final training frame
+                leftTurn = (float(dir - 1) % 4) #Model- Direction float representing bad dir + 1
+                model.fit(input_train[len(input_train)-1], tf.constant([leftTurn]), epochs = 1, verbose=0) #train final input frame
             #with final output frame turned to left
             input_train = [] #Reset input training frames
             output_train = [] #Reset output training frames

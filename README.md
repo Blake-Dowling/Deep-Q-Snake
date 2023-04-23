@@ -16,3 +16,6 @@ When training the model, the output training data must be specific to the intend
 The snake tended to loop, and after comparing the input and output of the keras model during this, I noticed that the model was predicting that the snake should turn 180 degrees. To fix this I altered the direction prediction step to use the greatest value excluding the direction opposite to the snake's current direction. This was done by setting the tensorflow prediction vector's value at the index '(snake.direction + 2) % 4' to 0.0 before finding the vector's maximum argument.
 
 Another factor ccausing looping was an excess reliance on the model by the snake. Once the model learned a direction from which it ate the apple, it tended to always prefer this direction. This issue was solved by adding a random direction change every 16 steps, to prevent too much reliance on the model and allow the snake to learn to encounter the apple from all directions.
+
+#Current Issues:
+The program crashes when the Scores1.txt file becomes too large, so the initial values of the file must be erased periodically.
