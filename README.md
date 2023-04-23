@@ -1,6 +1,6 @@
 # Python Tensorflow Deep Neural Network Q-Learning Snake Game Agent
 
-## Trains a Deep Neural Network to win a game of Snake uring Q-Learning
+## Trains a Deep Neural Network to win a game of Snake using Q-Learning
 
 ## This project is a Python application that trains a deep neural network using the game state as input and the snake's direction as output. It works by:
 

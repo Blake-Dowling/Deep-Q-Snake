@@ -67,8 +67,11 @@ def look(snake, apple):
     ##########Handle drawing white block outlines##########
     blocksSeen = [] #Reset blocksSeen list
     for seenDirection in seen:
+        outlineColor = "white"
+        if object[seenDirection] > 0.0:
+            outlineColor = "red"
         for seenBlock in seenDirection:
-            blocksSeen.append(Block(seenBlock[0], seenBlock[1], "", "white"))
+            blocksSeen.append(Block(seenBlock[0], seenBlock[1], "", outlineColor))
     return tf.constant([object + wall])# + distance])
 
 def updatePlot(statsPlot, statsCanvas, train_stats_x, train_stats_y, iteration, apples, fails):
@@ -182,6 +185,7 @@ if __name__ == "__main__":
     # visualPlot2 = visual.visual.MatrixPlot(window, 0, 450)
 
     ####################Main Loop####################
+    trainingFrames = 0
     TRAIN_MINUTES = 5
     iteration = 0
     loopedMoves = 0
@@ -195,9 +199,10 @@ if __name__ == "__main__":
     train_stats_x = []
     train_stats_y = []
 
-    statsPlot, statsCanvas = embed_plot.embedPlot(window, 0, 320, 2, train_stats_x, train_stats_y)
+    statsPlot, statsCanvas = embed_plot.embedPlot(window, 0, 300, 2, train_stats_x, train_stats_y)
     while iteration < 1000*TRAIN_MINUTES:
         if checkWin(snake):
+            print("You won!")
             break
         if iteration % 100 == 0:
             updatePlot(statsPlot, statsCanvas, train_stats_x, train_stats_y, iteration, apples, fails)
@@ -215,6 +220,7 @@ if __name__ == "__main__":
             for i in range(max(0,   min(len(input_train) -WIDTH, len(output_train) -WIDTH)), min(len(input_train), len(output_train))): #For each training frame
                 dir = tf.get_static_value(output_train[i]) #(Good) direction of snake with current frame
                 model.fit(input_train[i], tf.constant([dir]), epochs = 1, verbose=0) #Train each training state with direction frame
+                trainingFrames = trainingFrames + 1
             input_train = []
             output_train = []
         
@@ -255,13 +261,20 @@ if __name__ == "__main__":
                 dir = tf.get_static_value(output_train[len(output_train)-1]) #(Bad) direction of snake in final training frame
                 rightTurn = (float(dir + 1) % 4) #Model- Direction float representing bad dir + 1
                 model.fit(input_train[len(input_train)-1], tf.constant([rightTurn]), epochs = 1, verbose=0) #train final input frame
-            #with final output frame turned to right
+                #with final output frame turned to right
+                trainingFrames = trainingFrames + 1
             if snakeCollidedBody:
                 dir = tf.get_static_value(output_train[len(output_train)-1]) #(Bad) direction of snake in final training frame
                 leftTurn = (float(dir - 1) % 4) #Model- Direction float representing bad dir + 1
                 model.fit(input_train[len(input_train)-1], tf.constant([leftTurn]), epochs = 1, verbose=0) #train final input frame
-            #with final output frame turned to left
+                #with final output frame turned to left
+                trainingFrames = trainingFrames + 1
             input_train = [] #Reset input training frames
             output_train = [] #Reset output training frames
 
+
+##########Write Number of Training Frames##########
+framesFile = open("NumFrames.txt", "a+")
+framesFile.write("Number of Frames:" + str(trainingFrames) + "\n")
+framesFile.close()
 model.save("model1.h5")
