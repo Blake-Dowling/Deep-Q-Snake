@@ -53,7 +53,7 @@ def look(snake, apple):
                    min(WIDTH-head[0], head[1]+1)] #Distance to wall in each direction 
     seen = [[] for i in range(8)] #Coordinates in each direction
     object = [0.0 for i in range(8)] #Object seen in each direction
-    # wall = [0.0 for i in range(8)] #Wall seen in each direction
+    wall = [0.0 for i in range(8)] #Wall seen in each direction
     #distance = [0.0 for i in range(8)] #Distance seen in each direction
 
     for direction in range(0, 8): #For each direction
@@ -74,21 +74,23 @@ def look(snake, apple):
             #         object[direction] = 1.0
             #         break
             if nextLoc == apple.loc: #Last seen block was apple
-                object[direction] = 50.0
+                object[direction] = 1.0
                 break
             # if object[direction] > 0.0: #If object seen, stop line of vision
             #     for i in range(8):
             #         if i != direction:
             #             wall[i] = 1.0
             #     break
-        # wall[direction] = len(seen[direction]) #Number of blocks seen in direction
+        if len(seen[direction]) <= 0: #If vision length is 0 in direction
+            wall[direction] = 1.0 #Set wall to 1 for that direction
     blocksSeen = []
     #Highlight blocks seen in each direction
     for seenDirection in seen:
         for seenBlock in seenDirection:
             blocksSeen.append(Block(seenBlock[0], seenBlock[1], "", "white"))
     #return np.array(object + distance)
-    return tf.constant([object])# + distance])
+    print([object + wall])
+    return tf.constant([object + wall])# + distance])
     #return np.array([object.extend(distance)])
 
 
@@ -110,15 +112,9 @@ if __name__ == "__main__":
     window.bind("<Down>", lambda event: snake.setDir(1))
     window.bind("<Left>", lambda event: snake.setDir(2))
     window.bind("<Up>", lambda event: snake.setDir(3))
-    ####################Former Best Model####################
-    # model = keras.Sequential()
-    # layer1 = keras.layers.Dense(4, activation="softmax")
-    # model.add(layer1)
-    # opt = tf.keras.optimizers.Adam(learning_rate=0.001)
-    # model.compile(optimizer=opt, loss="categorical_crossentropy", metrics=["accuracy"])
     ####################New Model####################
     model = keras.Sequential()
-    layer0 = keras.layers.Flatten(input_shape=([8]))
+    layer0 = keras.layers.Flatten(input_shape=([16]))
     model.add(layer0)
     layer1 = keras.layers.Dense(16, activation="relu")
     model.add(layer1)
@@ -200,8 +196,8 @@ if __name__ == "__main__":
         output_train.append(directionTensor) #Save each chosen direction output for training (If successful)
         window.update()
         snake.move(ate) #Move snake
-        
-        if checkOB(snake) or loopedMoves > 24:
+        snakeIsOB = checkOB(snake)
+        if snakeIsOB or loopedMoves > 24:
             fails = fails + 1
             loopedMoves = 0
             del snake
@@ -209,15 +205,15 @@ if __name__ == "__main__":
             snake = Snake()
             #Create apple
             apple = Block(random.randint(0, WIDTH-1), random.randint(0, WIDTH-1), "red", "black")
-            for i in range(min(len(input_train), len(output_train))):
-                dir = tf.get_static_value(output_train[i]) #(Bad) direction of snake with current frame
-                #rightTurn = (float(dir + 1) % 4) #Model1 - Direction float representing bad dir + 1
-                #turnAround = (float(dir + 2) % 4) #Model1 - Direction float representing bad dir + 1
-                zeroDir = (float(dir + 2) % 4) #Direction float representing bad dir = 0
+            #for i in range(min(len(input_train), len(output_train))):
+            if snakeIsOB:
+                dir = tf.get_static_value(output_train[len(output_train)-1]) #(Bad) direction of snake in final training frame
+                rightTurn = (float(dir + 1) % 4) #Model- Direction float representing bad dir + 1
 
-                model.fit(input_train[i], tf.constant([rightTurn]), epochs = 1, verbose=0)
-            input_train = []
-            output_train = []
+                model.fit(input_train[len(input_train)-1], tf.constant([rightTurn]), epochs = 1, verbose=0) #train final input frame
+            #with final output frame turned to right
+            input_train = [] #Reset input training frames
+            output_train = [] #Reset output training frames
 
 
     # model.save("model8.h5")
