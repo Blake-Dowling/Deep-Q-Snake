@@ -33,6 +33,6 @@ I learned that when using CNNs, it is important to select the training model car
 
 The problem that I solved using this imformation was where the snake's performance began todecrease with increasing iterations. In order to solver this, I simplified my training method by using only the last training frames instead of all frames, from the run. In other words, I trained the model using only the last frames that the snake received before hitting a wall or itself.
 
-
+When training the model, the output training data must be specific to the intended action of the model.
 
 The snake tended to loop, and after comparing the input and output of the keras model during this, I noticed that the model was predicting that the snake should turn 180 degrees. To fix this I am going to alter the direction prediction step to use the greatest value excluding the direction opposite to the snake's current direction. This was done by setting the tensorflow prediction vector's value at the index '(snake.direction + 2) % 4' to 0.0 before finding the vector's maximum argument.

@@ -35,7 +35,7 @@ def look(snake, apple):
                    min(WIDTH-head[0], head[1]+1)] #Distance to wall in each direction 
     seen = [[] for i in range(8)] #Contains a list of seen blocks for each direction
     object = [0.0 for i in range(8)] #Object seen in each direction
-    wall = [0.0 for i in range(8)] #Wall seen in each direction
+    wall = [0.0 for i in range(4)] #Wall seen in each direction
     body = [0.0 for i in range(8)]
     for direction in range(0, 8): #For each direction
         for radius in range(1, distToWall[direction]): #For each coordinate from head to wall in current direction,
@@ -62,14 +62,15 @@ def look(snake, apple):
                 object[direction] = 1.0
                 break
         ##########Check if wall is next to head in currently checked direction##########
-        if len(seen[direction]) == 0: #If vision length is 0 in direction
-            wall[direction] = 1.0 #Set wall to 1 for that direction
+        if len(seen[direction]) == 0 and (direction % 2) == 0: #If vision length is 0 in direction and direction is
+            #right, down, left, or up
+            wall[int(direction / 2)] = 1.0 #Set wall to 1 for that direction
     ##########Handle drawing white block outlines##########
     blocksSeen = [] #Reset blocksSeen list
     for seenDirection in seen:
         for seenBlock in seenDirection:
             blocksSeen.append(Block(seenBlock[0], seenBlock[1], "", "white"))
-    return tf.constant([object + wall])# + distance])
+    return tf.constant([object + wall + [snake.dir]])# + distance])
 
 def updatePlot(statsPlot, statsCanvas, train_stats_x, train_stats_y, iteration, apples, fails):
     ##########Update stats plot x data##########
@@ -119,7 +120,7 @@ if __name__ == "__main__":
     window.bind("<Up>", lambda event: snake.setDir(3))
     ####################New Model####################
     model = keras.Sequential()
-    layer0 = keras.layers.Flatten(input_shape=([16]))
+    layer0 = keras.layers.Flatten(input_shape=([13]))
     model.add(layer0)
     layer1 = keras.layers.Dense(16, activation="relu")
     model.add(layer1)
@@ -161,7 +162,7 @@ if __name__ == "__main__":
             loopedMoves = 0
             del apple 
             apple = Block(random.randint(0, WIDTH-1), random.randint(0, WIDTH-1), "red", "black") #Move apple
-            for i in range(max(0,   min(len(input_train) -10, len(output_train) -10)), min(len(input_train), len(output_train))): #For each training frame
+            for i in range(max(0,   min(len(input_train) -16, len(output_train) -16)), min(len(input_train), len(output_train))): #For each training frame
                 dir = tf.get_static_value(output_train[i]) #(Good) direction of snake with current frame
                 model.fit(input_train[i], tf.constant([dir]), epochs = 1, verbose=0) #Train each training state with direction frame
             input_train = []
@@ -181,7 +182,7 @@ if __name__ == "__main__":
         bestDirection = tf.get_static_value(tf.math.argmax(tfOutput[0], output_type=tf.int64)) #Get max value of tf vector
         snake.dir = bestDirection #Set snake's new direction
         #Random direction every 100 frames to prevent looped learning
-        if iteration % 100 == 0:
+        if iteration % 16 == 0:
             snake.dir = random.randint(0,3)
 
 
