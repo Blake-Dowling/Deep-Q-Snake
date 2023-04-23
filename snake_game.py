@@ -72,9 +72,10 @@ class Snake:
     ############################## On Snake ##############################
     #Returns True if passed block shares location with a body block
     def onSnake(self, blockIn):
-        for block in self.blocks[1:]:
-            if blockIn.loc == block.loc:
-                return True
+        if len(self.blocks):
+            for block in self.blocks[1:]:
+                if blockIn.loc == block.loc:
+                    return True
         return False
 ############################## Check Ate ##############################
 #Returns True if head is on apple
@@ -89,6 +90,10 @@ def checkOB(snake):
         snake.blocks[0].loc[0] > WIDTH or
         snake.blocks[0].loc[1] < 0 or
         snake.blocks[0].loc[1] > WIDTH)
+############################## Check Self-Collision ##############################
+#Returns True if head is on body
+def checkSelfCollision(snake):
+    return snake.onSnake(snake.blocks[0]) #Returns true of snake's head is on a body block
 ############################################################
 ############################## Main ##############################
 ############################################################
