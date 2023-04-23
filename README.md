@@ -25,4 +25,14 @@ An obstacle was deciding which inputs the model should receive. My goal was to m
 
 What I learned:
 
+The first major mistake that I made when making this project is that I attempted to build a feedforward neural network without using a library such as tensorflow to test it. Although I was successful in implementing a multilayer network with backpropagation, using MSE as its loss function, I wasn't able to measure its effectiveness with different permutations of layer settings such as activation functions, optimizers, and loss functions without the program becoming too complex. Thus, I decided to implement the game AI using tensorflow, so that I can later apply my own CNN implementation with a reference with which to test.
+
+Mistakes in applying the keras model:
+
+I learned that when using CNNs, it is important to select the training model carefully. When using CNNs, it is important to notice that input data may have conflicting effects on the network's weights when training the model. To use this application as an example, if the snake's recognition of the apple contributes to a decrease in the loss but input training frames in which the snake recognized the apple are used to apply a negative Q value, this will lead to an unclear regression estimation, given that the snake recognizes the apple.
+
+The problem that I solved using this imformation was where the snake's performance began todecrease with increasing iterations. In order to solver this, I simplified my training method by using only the last training frames instead of all frames, from the run. In other words, I trained the model using only the last frames that the snake received before hitting a wall or itself.
+
+
+
 The snake tended to loop, and after comparing the input and output of the keras model during this, I noticed that the model was predicting that the snake should turn 180 degrees. To fix this I am going to alter the direction prediction step to use the greatest value excluding the direction opposite to the snake's current direction. This was done by setting the tensorflow prediction vector's value at the index '(snake.direction + 2) % 4' to 0.0 before finding the vector's maximum argument.

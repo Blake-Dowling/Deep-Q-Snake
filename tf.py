@@ -69,7 +69,6 @@ def look(snake, apple):
     for seenDirection in seen:
         for seenBlock in seenDirection:
             blocksSeen.append(Block(seenBlock[0], seenBlock[1], "", "white"))
-    print(object + wall)
     return tf.constant([object + wall])# + distance])
 
 def updatePlot(statsPlot, statsCanvas, train_stats_x, train_stats_y, iteration, apples, fails):
@@ -119,20 +118,20 @@ if __name__ == "__main__":
     window.bind("<Left>", lambda event: snake.setDir(2))
     window.bind("<Up>", lambda event: snake.setDir(3))
     ####################New Model####################
-    # model = keras.Sequential()
-    # layer0 = keras.layers.Flatten(input_shape=([16]))
-    # model.add(layer0)
-    # layer1 = keras.layers.Dense(16, activation="relu")
-    # model.add(layer1)
-    # layer2 = keras.layers.Dense(4, activation="softmax")
-    # model.add(layer2)
-    # model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+    model = keras.Sequential()
+    layer0 = keras.layers.Flatten(input_shape=([16]))
+    model.add(layer0)
+    layer1 = keras.layers.Dense(16, activation="relu")
+    model.add(layer1)
+    layer2 = keras.layers.Dense(4, activation="softmax")
+    model.add(layer2)
+    model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
 
 
 
 
     ####################Load Model####################
-    model = keras.models.load_model("model1.h5")
+    #model = keras.models.load_model("model1.h5")
 
     ####################Tensor Visualizers####################
     # visualPlot1 = visual.visual.MatrixPlot(window, 0, 200)
@@ -177,19 +176,23 @@ if __name__ == "__main__":
         #to prevent 180 degree turns
         # visualPlot1.plotMatrix(currentVision) 
         # visualPlot2.plotMatrix(tfOutput)
-        print(tfOutput)
+        # print(tfOutput)
         
         bestDirection = tf.get_static_value(tf.math.argmax(tfOutput[0], output_type=tf.int64)) #Get max value of tf vector
-
-
         snake.dir = bestDirection #Set snake's new direction
+        #Random direction every 100 frames to prevent looped learning
+        if iteration % 100 == 0:
+            snake.dir = random.randint(0,3)
+
+
+        
         directionTensor = tf.constant(float(bestDirection)) #Training direction for current state
         output_train.append(directionTensor) #Save each chosen direction output for training (If successful)
         window.update()
         snake.move(ate) #Move snake
         snakeIsOB = checkOB(snake)
         # snakeCollidedBody = checkSelfCollision(snake)
-        if snakeIsOB or loopedMoves > 24:
+        if snakeIsOB or loopedMoves > 50:
             fails = fails + 1
             loopedMoves = 0
             del snake
