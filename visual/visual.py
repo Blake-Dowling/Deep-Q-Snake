@@ -10,8 +10,8 @@ import math
 
 ####################Adding Plots####################
 class MatrixPlot:
-    def __init__(self, window, x, y):
-        (self.plot, self.plotCanvas) = embed_plot.embedPlot(window, x, y, 2, [], [] )
+    def __init__(self, window, x, y, title):
+        (self.plot, self.plotCanvas) = embed_plot.embedPlot(window, x, y, 2, [], [], title)
     # (plot1, plotCanvas1) = embed_plot.embedPlot(window, 200, 300, 2, [], [] )
     # (plot2, plotCanvas2) = embed_plot.embedPlot(window, 0, 300, 2, [], [] )
     def plotMatrix(self, matrix):

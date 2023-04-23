@@ -68,11 +68,11 @@ def look(snake, apple):
     blocksSeen = [] #Reset blocksSeen list
     for seenDirection in seen:
         outlineColor = "white"
-        if object[seenDirection] > 0.0:
+        if object[seen.index(seenDirection)] > 0.0:
             outlineColor = "red"
         for seenBlock in seenDirection:
             blocksSeen.append(Block(seenBlock[0], seenBlock[1], "", outlineColor))
-    return tf.constant([object + wall])# + distance])
+    return tf.constant([object + wall + body + [snake.dir]])# + distance])
 
 def updatePlot(statsPlot, statsCanvas, train_stats_x, train_stats_y, iteration, apples, fails):
     ##########Update stats plot x data##########
@@ -165,24 +165,24 @@ if __name__ == "__main__":
     window.bind("<Left>", lambda event: snake.setDir(2))
     window.bind("<Up>", lambda event: snake.setDir(3))
     ####################New Model####################
-    # model = keras.Sequential()
-    # layer0 = keras.layers.Flatten(input_shape=([8]))
-    # model.add(layer0)
-    # layer1 = keras.layers.Dense(16, activation="relu")
-    # model.add(layer1)
-    # layer2 = keras.layers.Dense(4, activation="softmax")
-    # model.add(layer2)
-    # model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+    model = keras.Sequential()
+    layer0 = keras.layers.Flatten(input_shape=([13]))
+    model.add(layer0)
+    layer1 = keras.layers.Dense(16, activation="relu")
+    model.add(layer1)
+    layer2 = keras.layers.Dense(4, activation="softmax")
+    model.add(layer2)
+    model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
 
 
 
 
     ####################Load Model####################
-    model = keras.models.load_model("model1.h5")
+    #model = keras.models.load_model("model1.h5")
 
     ####################Tensor Visualizers####################
-    # visualPlot1 = visual.visual.MatrixPlot(window, 0, 200)
-    # visualPlot2 = visual.visual.MatrixPlot(window, 0, 450)
+    visualPlot1 = visual.visual.MatrixPlot(window, 20, 450, "Input Layer")
+    visualPlot2 = visual.visual.MatrixPlot(window, 220, 450, "Output Layer")
 
     ####################Main Loop####################
     trainingFrames = 0
@@ -199,7 +199,7 @@ if __name__ == "__main__":
     train_stats_x = []
     train_stats_y = []
 
-    statsPlot, statsCanvas = embed_plot.embedPlot(window, 0, 300, 2, train_stats_x, train_stats_y)
+    statsPlot, statsCanvas = embed_plot.embedPlot(window, 20, 240, 2, train_stats_x, train_stats_y, "Performance")
     while iteration < 1000*TRAIN_MINUTES:
         if checkWin(snake):
             print("You won!")
@@ -231,8 +231,8 @@ if __name__ == "__main__":
         tfOutput = model.predict(currentVision, verbose=0) #Get tf model's best direction guess with current state
         tfOutput[0][(snake.dir + 2) % 4] = 0.0 #Set prediction in direction opposite to snake's direction to 0
         #to prevent 180 degree turns
-        # visualPlot1.plotMatrix(currentVision) 
-        # visualPlot2.plotMatrix(tfOutput)
+        visualPlot1.plotMatrix(currentVision) 
+        visualPlot2.plotMatrix(tfOutput)
         # print(tfOutput)
         
         bestDirection = tf.get_static_value(tf.math.argmax(tfOutput[0], output_type=tf.int64)) #Get max value of tf vector
@@ -278,3 +278,4 @@ framesFile = open("NumFrames.txt", "a+")
 framesFile.write("Number of Frames:" + str(trainingFrames) + "\n")
 framesFile.close()
 model.save("model1.h5")
+time.sleep(200)

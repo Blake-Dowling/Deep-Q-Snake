@@ -14,8 +14,8 @@ window = Tk()
 window.resizable(False, False)
 canvas = Canvas(window,
                 bg = "black",
-                width = WIDTH*CELL,
-                height = WIDTH*CELL + 280)
+                width = WIDTH*CELL + 280,
+                height = WIDTH*CELL + 540)
 canvas.pack()
 ############################################################
 ############################## Block Class ##############################
@@ -91,7 +91,8 @@ def checkOB(snake):
         snake.blocks[0].loc[1] < 0 or
         snake.blocks[0].loc[1] >= WIDTH)
 def checkWin(snake):
-    return len(snake.blocks) == WIDTH * WIDTH
+    print(len(snake.blocks), WIDTH*WIDTH)
+    return len(snake.blocks) >= WIDTH * WIDTH
 ############################## Check Self-Collision ##############################
 #Returns True if head is on body
 def checkSelfCollision(snake):
