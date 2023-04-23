@@ -19,7 +19,7 @@ def embedPlot(window, xLocation, yLocation, size, xData, yData):
     plot.tick_params(color = "blue", labelcolor = "blue")
     #plot.xaxis.label.set_color("blue")
 
-    plot.plot(xData, yData, ".", color = "lime")
+    # plot.plot(xData, yData, ".", color = "lime")
     plotCanvas = FigureCanvasTkAgg(fig, master = window)
     plotCanvas.draw()
     plotCanvas.get_tk_widget().place(x = xLocation, y = yLocation)

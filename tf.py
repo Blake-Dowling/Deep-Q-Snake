@@ -10,6 +10,7 @@ from snake_game import *
 import visual.visual
 from visual.visual import *
 import visual.embed_plot
+import ast
 
 
 
@@ -26,29 +27,22 @@ def look(snake, apple):
     else:
         return np.array([0.0 for i in range(16)])
     distToWall = [WIDTH-head[0],
-                   min(WIDTH-head[0], WIDTH-head[1]),
                    WIDTH-head[1],
-                   min(head[0]+1, WIDTH-head[1]),
                    head[0]+1,
-                   min(head[0]+1, head[1]+1),
-                   head[1]+1,
-                   min(WIDTH-head[0], head[1]+1)] #Distance to wall in each direction 
-    seen = [[] for i in range(8)] #Contains a list of seen blocks for each direction
-    object = [0.0 for i in range(8)] #Object seen in each direction
+                   head[1]+1
+] #Distance to wall in each direction 
+    seen = [[] for i in range(4)] #Contains a list of seen blocks for each direction
+    object = [0.0 for i in range(4)] #Object seen in each direction
     wall = [0.0 for i in range(4)] #Wall seen in each direction
-    body = [0.0 for i in range(8)]
-    for direction in range(0, 8): #For each direction
+    body = [0.0 for i in range(4)]
+    for direction in range(0, 4): #For each direction
         for radius in range(1, distToWall[direction]): #For each coordinate from head to wall in current direction,
             # where radius is radial distance from head
             match (direction):
                 case 0: nextLoc = (head[0]+radius, head[1]) #Block coordinates seen to right
-                case 1: nextLoc = (head[0]+radius, head[1]+radius) #Block coordinates seen to bottom-right
-                case 2: nextLoc = (head[0], head[1]+radius) #Block coordinates seen to bottom
-                case 3: nextLoc = (head[0]-radius, head[1]+radius) #Block coordinates seen to bottom-left
-                case 4: nextLoc = (head[0]-radius, head[1]) #Block coordinates seen to left
-                case 5: nextLoc = (head[0]-radius, head[1]-radius) #Block coordinates seen to top-left
-                case 6: nextLoc = (head[0], head[1]-radius) #Block coordinates seen to top
-                case 7: nextLoc = (head[0]+radius, head[1]-radius) #Block coordinates seen to top-right
+                case 1: nextLoc = (head[0], head[1]+radius) #Block coordinates seen to bottom
+                case 2: nextLoc = (head[0]-radius, head[1]) #Block coordinates seen to left
+                case 3: nextLoc = (head[0], head[1]-radius) #Block coordinates seen to top
                 case _: break
             seen[direction].append(nextLoc) #Blocks seen so far in direction
             ##########Check if body block next to head##########
@@ -57,14 +51,19 @@ def look(snake, apple):
             #         if block.loc == nextLoc: #Seen block is a snake body block
             #             body[direction] = 1.0 #Set input for 'body seen in this direction' to 1.0
             #             break
-            ##########Check if apple seen in currently checked direction##########
-            if nextLoc == apple.loc: #Last seen block was apple
-                object[direction] = 1.0
-                break
         ##########Check if wall is next to head in currently checked direction##########
         if len(seen[direction]) == 0 and (direction % 2) == 0: #If vision length is 0 in direction and direction is
             #right, down, left, or up
             wall[int(direction / 2)] = 1.0 #Set wall to 1 for that direction
+    ##########Check apple's location in relation to snake head##########
+    if head[0] < apple.loc[0]: #Apple to right of snake head
+        object[0] = 1.0
+    if head[1] < apple.loc[1]: #Apple below snake head
+        object[1] = 1.0
+    if head[0] > apple.loc[0]: #Apple to left of snake head
+        object[2] = 1.0
+    if head[1] > apple.loc[1]: #Apple above snake head
+        object[3] = 1.0
     ##########Handle drawing white block outlines##########
     blocksSeen = [] #Reset blocksSeen list
     for seenDirection in seen:
@@ -92,14 +91,45 @@ def updatePlot(statsPlot, statsCanvas, train_stats_x, train_stats_y, iteration, 
     snake_game.canvas.update()
     newLine.remove()
     ##########Write Stats to scores file##########
-    scoreFile = open("Scores1", "a+")
-    scoreFile.write("Cumulative Iterations: " + str(iteration) +\
-                    "Apples: " + str(apples) +\
-                    "Fails: " + str(fails) +\
-                    "Performance (Apples/Fails): " + str(performance)
-                    + "\n")
+    scoreFile = open("Scores1.txt", "a+")
+    scoreFile.write("Train_Stats:" + str(train_stats_x) + ":" +\
+                    str(train_stats_y) + ": \n" +\
+                    "Cumulative_Iterations: " + str(iteration) +\
+                    " Apples: " + str(apples) +\
+                    " Fails: " + str(fails) +\
+                    " Performance_(Apples/Fails): " + str(performance)
+                    + " \n")
     scoreFile.close()
 
+def loadStats():
+    scoreFile = open("Scores1.txt", "r")
+    lines = scoreFile.readlines()
+    secondLastLine = ""
+    lastLine = ""
+    if(len(lines)):
+        secondLastLine = lines[len(lines)-2]
+        lastLine = lines[len(lines)-1]
+
+
+    trainList = secondLastLine.split(':')
+    lastLine.replace(':', ' ')
+    lineList = lastLine.split(' ')
+    train_stats_x = []
+    train_stats_y = []
+    if(len(trainList) >= 3):
+        train_stats_x = list(map(float, ast.literal_eval(trainList[1])))
+        train_stats_y = list(map(float, ast.literal_eval(trainList[2])))
+        
+    iteration = 0
+    apples = 0
+    fails = 0
+    if(len(lineList) >= 9):
+        iteration = int(lineList[1])
+        apples = int(lineList[3])
+        fails = int(lineList[5])
+    scoreFile.close()
+    return (train_stats_x, train_stats_y, iteration, apples, fails)
+    
 
 if __name__ == "__main__":
     
@@ -119,33 +149,37 @@ if __name__ == "__main__":
     window.bind("<Left>", lambda event: snake.setDir(2))
     window.bind("<Up>", lambda event: snake.setDir(3))
     ####################New Model####################
-    model = keras.Sequential()
-    layer0 = keras.layers.Flatten(input_shape=([12]))
-    model.add(layer0)
-    layer1 = keras.layers.Dense(16, activation="relu")
-    model.add(layer1)
-    layer2 = keras.layers.Dense(4, activation="softmax")
-    model.add(layer2)
-    model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+    # model = keras.Sequential()
+    # layer0 = keras.layers.Flatten(input_shape=([8]))
+    # model.add(layer0)
+    # layer1 = keras.layers.Dense(16, activation="relu")
+    # model.add(layer1)
+    # layer2 = keras.layers.Dense(4, activation="softmax")
+    # model.add(layer2)
+    # model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
 
 
 
 
     ####################Load Model####################
-    #model = keras.models.load_model("model1.h5")
+    model = keras.models.load_model("model1.h5")
 
     ####################Tensor Visualizers####################
     # visualPlot1 = visual.visual.MatrixPlot(window, 0, 200)
     # visualPlot2 = visual.visual.MatrixPlot(window, 0, 450)
 
     ####################Main Loop####################
-    TRAIN_MINUTES = 1
+    TRAIN_MINUTES = 10
+    iteration = 0
     loopedMoves = 0
     apples = 0
     fails = 0
-    iteration = 0
-    train_stats_x = [iteration]
-    train_stats_y = [0]
+
+    train_stats_x = []
+    train_stats_y = []
+    #Set stats to cumulative stats from Scores1 file
+    (train_stats_x, train_stats_y, iteration, apples, fails) = loadStats()
+    
     statsPlot, statsCanvas = embed_plot.embedPlot(window, 0, 0, 2, train_stats_x, train_stats_y)
     while iteration < 1000*TRAIN_MINUTES:
         if iteration % 100 == 0:
@@ -181,9 +215,9 @@ if __name__ == "__main__":
         
         bestDirection = tf.get_static_value(tf.math.argmax(tfOutput[0], output_type=tf.int64)) #Get max value of tf vector
         snake.dir = bestDirection #Set snake's new direction
-        #Random direction every 100 frames to prevent looped learning
-        # if iteration % 16 == 0:
-        #     snake.dir = random.randint(0,3)
+        #Random direction every 16 frames to prevent looped learning
+        if iteration % 16 == 0:
+            snake.dir = random.randint(0,3)
 
 
         
@@ -193,7 +227,7 @@ if __name__ == "__main__":
         snake.move(ate) #Move snake
         snakeIsOB = checkOB(snake)
         # snakeCollidedBody = checkSelfCollision(snake)
-        if snakeIsOB or loopedMoves > 50:
+        if snakeIsOB or loopedMoves > 100:
             fails = fails + 1
             loopedMoves = 0
             del snake
