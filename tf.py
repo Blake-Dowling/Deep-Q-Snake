@@ -139,7 +139,7 @@ if __name__ == "__main__":
     # visualPlot2 = visual.visual.MatrixPlot(window, 0, 450)
 
     ####################Main Loop####################
-    TRAIN_MINUTES = 10
+    TRAIN_MINUTES = 1
     loopedMoves = 0
     apples = 0
     fails = 0
