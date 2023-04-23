@@ -69,6 +69,7 @@ def look(snake, apple):
     for seenDirection in seen:
         for seenBlock in seenDirection:
             blocksSeen.append(Block(seenBlock[0], seenBlock[1], "", "white"))
+    print(object + wall)
     return tf.constant([object + wall])# + distance])
 
 def updatePlot(statsPlot, statsCanvas, train_stats_x, train_stats_y, iteration, apples, fails):
@@ -118,20 +119,20 @@ if __name__ == "__main__":
     window.bind("<Left>", lambda event: snake.setDir(2))
     window.bind("<Up>", lambda event: snake.setDir(3))
     ####################New Model####################
-    model = keras.Sequential()
-    layer0 = keras.layers.Flatten(input_shape=([16]))
-    model.add(layer0)
-    layer1 = keras.layers.Dense(16, activation="relu")
-    model.add(layer1)
-    layer2 = keras.layers.Dense(4, activation="softmax")
-    model.add(layer2)
-    model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+    # model = keras.Sequential()
+    # layer0 = keras.layers.Flatten(input_shape=([16]))
+    # model.add(layer0)
+    # layer1 = keras.layers.Dense(16, activation="relu")
+    # model.add(layer1)
+    # layer2 = keras.layers.Dense(4, activation="softmax")
+    # model.add(layer2)
+    # model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
 
 
 
 
     ####################Load Model####################
-    #model = keras.models.load_model("model1.h5")
+    model = keras.models.load_model("model1.h5")
 
     ####################Tensor Visualizers####################
     # visualPlot1 = visual.visual.MatrixPlot(window, 0, 200)
@@ -172,6 +173,8 @@ if __name__ == "__main__":
         input_train.append(currentVision) #Save each vision input for training (If successful)
         
         tfOutput = model.predict(currentVision, verbose=0) #Get tf model's best direction guess with current state
+        tfOutput[0][(snake.dir + 2) % 4] = 0.0 #Set prediction in direction opposite to snake's direction to 0
+        #to prevent 180 degree turns
         # visualPlot1.plotMatrix(currentVision) 
         # visualPlot2.plotMatrix(tfOutput)
         print(tfOutput)

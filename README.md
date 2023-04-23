@@ -22,3 +22,7 @@ An obstacle was deciding which inputs the model should receive. My goal was to m
 # input[13] - distance of object seen to top-left
 # input[14] - distance of object seen to top
 # input[15] - distance of object seen to top-right
+
+What I learned:
+
+The snake tended to loop, and after comparing the input and output of the keras model during this, I noticed that the model was predicting that the snake should turn 180 degrees. To fix this I am going to alter the direction prediction step to use the greatest value excluding the direction opposite to the snake's current direction. This was done by setting the tensorflow prediction vector's value at the index '(snake.direction + 2) % 4' to 0.0 before finding the vector's maximum argument.
