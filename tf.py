@@ -9,6 +9,7 @@ import snake_game
 from snake_game import *
 import visual.visual
 from visual.visual import *
+import visual.embed_plot
 
 
 
@@ -51,26 +52,57 @@ def look(snake, apple):
                 case _: break
             seen[direction].append(nextLoc) #Blocks seen so far in direction
             ##########Check if body block next to head##########
-            if radius == 1: #Vision block coordinate next to head in currently checked direction
-                for block in snake.blocks: #Must check each body block
-                    if block.loc == nextLoc: #Seen block is a snake body block
-                        body[direction] = 1.0 #Set input for 'body seen in this direction' to 1.0
-                        break
+            # if radius == 1: #Vision block coordinate next to head in currently checked direction
+            #     for block in snake.blocks: #Must check each body block
+            #         if block.loc == nextLoc: #Seen block is a snake body block
+            #             body[direction] = 1.0 #Set input for 'body seen in this direction' to 1.0
+            #             break
             ##########Check if apple seen in currently checked direction##########
             if nextLoc == apple.loc: #Last seen block was apple
                 object[direction] = 1.0
                 break
         ##########Check if wall is next to head in currently checked direction##########
-        if len(seen[direction]) <= 0: #If vision length is 0 in direction
+        if len(seen[direction]) == 0: #If vision length is 0 in direction
             wall[direction] = 1.0 #Set wall to 1 for that direction
     ##########Handle drawing white block outlines##########
     blocksSeen = [] #Reset blocksSeen list
     for seenDirection in seen:
         for seenBlock in seenDirection:
             blocksSeen.append(Block(seenBlock[0], seenBlock[1], "", "white"))
-    return tf.constant([object + wall + body])# + distance])
+    return tf.constant([object + wall])# + distance])
+
+def updatePlot(statsPlot, statsCanvas, train_stats_x, train_stats_y, iteration, apples, fails):
+    ##########Update stats plot x data##########
+    cumulative_iterations = iteration #cumulative iterations (x-axis)
+    if len(train_stats_x):
+        cumulative_iterations = train_stats_x[len(train_stats_x) - 1] + iteration #Add iterations from this
+        #run to previous cumulative amount
+    train_stats_x.append(cumulative_iterations) #Add cumulative iterations amount to plot's x data
+
+    ##########Update stats plot y data##########
+    performance = apples
+    if fails > 0:
+        performance = apples/fails
+    train_stats_y.append(performance) #Add performancy to plot's y data
+
+    ##########Update plot##########
+    newLine, = statsPlot.plot(train_stats_x, train_stats_y)
+    statsCanvas.draw()
+    snake_game.canvas.update()
+    newLine.remove()
+    ##########Write Stats to scores file##########
+    scoreFile = open("Scores1", "a+")
+    scoreFile.write("Cumulative Iterations: " + str(iteration) +\
+                    "Apples: " + str(apples) +\
+                    "Fails: " + str(fails) +\
+                    "Performance (Apples/Fails): " + str(performance)
+                    + "\n")
+    scoreFile.close()
+
 
 if __name__ == "__main__":
+    
+
     snake = Snake()
     #Create apple
     apple = Block(random.randint(0, WIDTH-1), random.randint(0, WIDTH-1), "red", "black")
@@ -87,7 +119,7 @@ if __name__ == "__main__":
     window.bind("<Up>", lambda event: snake.setDir(3))
     ####################New Model####################
     model = keras.Sequential()
-    layer0 = keras.layers.Flatten(input_shape=([24]))
+    layer0 = keras.layers.Flatten(input_shape=([16]))
     model.add(layer0)
     layer1 = keras.layers.Dense(16, activation="relu")
     model.add(layer1)
@@ -99,24 +131,29 @@ if __name__ == "__main__":
 
 
     ####################Load Model####################
-    # model = keras.models.load_model("model1.h5")
+    #model = keras.models.load_model("model1.h5")
 
     ####################Tensor Visualizers####################
     # visualPlot1 = visual.visual.MatrixPlot(window, 0, 200)
     # visualPlot2 = visual.visual.MatrixPlot(window, 0, 450)
 
     ####################Main Loop####################
-    TRAIN_MINUTES = 5
+    TRAIN_MINUTES = 10
     loopedMoves = 0
     apples = 0
     fails = 0
     iteration = 0
+    train_stats_x = [iteration]
+    train_stats_y = [0]
+    statsPlot, statsCanvas = embed_plot.embedPlot(window, 0, 0, 2, train_stats_x, train_stats_y)
     while iteration < 1000*TRAIN_MINUTES:
+        if iteration % 100 == 0:
+            updatePlot(statsPlot, statsCanvas, train_stats_x, train_stats_y, iteration, apples, fails)
         iteration = iteration + 1
         loopedMoves = loopedMoves + 1
         
-        time.sleep(.001)
-        print("Iteration: " + str(iteration))
+        time.sleep(.005)
+        #print("Iteration: " + str(iteration))
         
         ate = checkAte(snake, apple) #Check if head on apple
         if ate:
@@ -148,8 +185,8 @@ if __name__ == "__main__":
         window.update()
         snake.move(ate) #Move snake
         snakeIsOB = checkOB(snake)
-        snakeCollidedBody = checkSelfCollision(snake)
-        if snakeIsOB or snakeCollidedBody or loopedMoves > 24:
+        # snakeCollidedBody = checkSelfCollision(snake)
+        if snakeIsOB or loopedMoves > 24:
             fails = fails + 1
             loopedMoves = 0
             del snake
@@ -163,19 +200,12 @@ if __name__ == "__main__":
                 rightTurn = (float(dir + 1) % 4) #Model- Direction float representing bad dir + 1
                 model.fit(input_train[len(input_train)-1], tf.constant([rightTurn]), epochs = 1, verbose=0) #train final input frame
             #with final output frame turned to right
-            if snakeCollidedBody:
-                dir = tf.get_static_value(output_train[len(output_train)-1]) #(Bad) direction of snake in final training frame
-                leftTurn = (float(dir - 1) % 4) #Model- Direction float representing bad dir + 1
-                model.fit(input_train[len(input_train)-1], tf.constant([leftTurn]), epochs = 1, verbose=0) #train final input frame
+            # if snakeCollidedBody:
+            #     dir = tf.get_static_value(output_train[len(output_train)-1]) #(Bad) direction of snake in final training frame
+            #     leftTurn = (float(dir - 1) % 4) #Model- Direction float representing bad dir + 1
+            #     model.fit(input_train[len(input_train)-1], tf.constant([leftTurn]), epochs = 1, verbose=0) #train final input frame
             #with final output frame turned to left
             input_train = [] #Reset input training frames
             output_train = [] #Reset output training frames
 
-
-    # model.save("model8.h5")
-    # scoreFile = open("Scores8", "a+")
-    # scoreFile.write("Steps: " + str(iteration) +\
-    #                 "Apples: " + str(apples) +\
-    #                 "Fails: " + str(fails) \
-    #                 + "\n")
-    # scoreFile.close()
+model.save("model1.h5")

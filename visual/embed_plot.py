@@ -8,8 +8,8 @@ def embedPlot(window, xLocation, yLocation, size, xData, yData):
     fig = Figure(figsize = (size, size), dpi = 100, facecolor = "black", edgecolor = "blue")
     plot = fig.add_subplot(111, facecolor = "black")
 
-    plot.set_xlim(left = 0, right = 10)
-    plot.set_ylim(bottom = 0, top = 10)
+    # plot.set_xlim(left = 0, right = 10000)
+    # plot.set_ylim(bottom = 0, top = 10)
 
     plot.spines["right"].set_color("blue")
     plot.spines["bottom"].set_color("blue")
