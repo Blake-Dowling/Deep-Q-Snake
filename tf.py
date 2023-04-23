@@ -70,7 +70,7 @@ def look(snake, apple):
     for seenDirection in seen:
         for seenBlock in seenDirection:
             blocksSeen.append(Block(seenBlock[0], seenBlock[1], "", "white"))
-    return tf.constant([object + wall + [snake.dir]])# + distance])
+    return tf.constant([object + wall])# + distance])
 
 def updatePlot(statsPlot, statsCanvas, train_stats_x, train_stats_y, iteration, apples, fails):
     ##########Update stats plot x data##########
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     window.bind("<Up>", lambda event: snake.setDir(3))
     ####################New Model####################
     model = keras.Sequential()
-    layer0 = keras.layers.Flatten(input_shape=([13]))
+    layer0 = keras.layers.Flatten(input_shape=([12]))
     model.add(layer0)
     layer1 = keras.layers.Dense(16, activation="relu")
     model.add(layer1)
@@ -182,8 +182,8 @@ if __name__ == "__main__":
         bestDirection = tf.get_static_value(tf.math.argmax(tfOutput[0], output_type=tf.int64)) #Get max value of tf vector
         snake.dir = bestDirection #Set snake's new direction
         #Random direction every 100 frames to prevent looped learning
-        if iteration % 16 == 0:
-            snake.dir = random.randint(0,3)
+        # if iteration % 16 == 0:
+        #     snake.dir = random.randint(0,3)
 
 
         
