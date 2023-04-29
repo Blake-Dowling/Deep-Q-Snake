@@ -79,7 +79,7 @@ def updatePlot(statsPlot, statsCanvas, train_stats_x, train_stats_y, iteration, 
     ##########Update stats plot x data##########
     cumulative_iterations = iteration #cumulative iterations (x-axis)
     if len(train_stats_x):
-        cumulative_iterations = train_stats_x[len(train_stats_x) - 1] + iteration #Add iterations from this
+        cumulative_iterations = iteration #Add iterations from this
         #run to previous cumulative amount
     train_stats_x.append(cumulative_iterations) #Add cumulative iterations amount to plot's x data
 
@@ -106,28 +106,35 @@ def updatePlot(statsPlot, statsCanvas, train_stats_x, train_stats_y, iteration, 
     scoreFile.close()
 
 def loadStats():
-    ##########Deleting file each time for now to manage size.##########
-    open("Scores1.txt", "w").close()
+    ##########Get the content of the score file##########
+    open("Scores1.txt", "w").close() #Reset score file for now, unknown freezing from updateplot writing.
     scoreFile = open("Scores1.txt", "r")
     lines = scoreFile.readlines()
     scoreFile.close()
     
+    ##########Get the last 2 lines of the score file##########
     secondLastLine = ""
     lastLine = ""
     if(len(lines)):
         secondLastLine = lines[len(lines)-2]
         lastLine = lines[len(lines)-1]
 
-
+    ##########Parse the last 2 lines of the score file##########
     trainList = secondLastLine.split(':')
     lastLine.replace(':', ' ')
     lineList = lastLine.split(' ')
+    ##########Retrieve the training lists from score file##########
     train_stats_x = []
     train_stats_y = []
     if(len(trainList) >= 3):
         train_stats_x = list(map(float, ast.literal_eval(trainList[1])))
         train_stats_y = list(map(float, ast.literal_eval(trainList[2])))
-        
+        ##########Reinitialize train stats lists##########
+        collapsed_stats_x = train_stats_x[-1] #new train stats x is previous max cumulative frame count
+        collapsed_stats_y = sum(train_stats_y)/len(train_stats_y)
+        train_stats_x = [collapsed_stats_x]
+        train_stats_y = [collapsed_stats_y]
+    ##########Assign stored counts from score file##########
     iteration = 0
     apples = 0
     fails = 0

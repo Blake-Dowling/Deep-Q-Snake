@@ -14,7 +14,7 @@ window = Tk()
 window.resizable(False, False)
 canvas = Canvas(window,
                 bg = "black",
-                width = WIDTH*CELL + 280,
+                width = WIDTH*CELL + 300,
                 height = WIDTH*CELL + 540)
 canvas.pack()
 ############################################################
